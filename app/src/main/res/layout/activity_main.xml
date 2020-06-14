@@ -17,27 +17,37 @@
         android:id="@+id/switch_button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:checkedColor="@android:color/holo_blue_bright"
+        app:uncheckedColor="@android:color/holo_red_light"
         android:layout_marginVertical="20dp"
         app:isChecked="true" />
 
     <com.dzenm.lib.SwitchButton
         android:id="@+id/switch_button3"
-        app:checkedColor="@color/colorPrimaryDark"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:checkedColor="@color/colorPrimaryDark" />
 
     <com.dzenm.lib.SwitchButton
         android:id="@+id/switch_button4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="20dp"
         android:isScrollContainer="false"
-        app:isEnabledAnimator="false"
+        app:isEnabledAnimator="false" />
+
+    <com.dzenm.lib.SwitchButton
+        android:id="@+id/switch_button5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:buttonCheckedColor="@color/colorAccent"
+        app:buttonUncheckedColor="@color/colorPrimary" />
+
+    <com.dzenm.lib.SwitchButton
+        android:id="@+id/switch_button6"
+        app:isChecked="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginVertical="20dp" />
 
-    <com.dzenm.lib.SwitchButton
-        android:id="@+id/switch_button5"
-        app:buttonCheckedColor="@color/colorAccent"
-        app:buttonUncheckedColor="@color/colorPrimary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 </LinearLayout>

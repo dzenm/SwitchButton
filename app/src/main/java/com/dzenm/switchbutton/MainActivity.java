@@ -1,6 +1,7 @@
 package com.dzenm.switchbutton;
 
 import android.os.Bundle;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
         SwitchButton switchButton1 = findViewById(R.id.switch_button1);
         switchButton1.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(boolean isChecked) {
+            public void onCheckedChanged(SwitchButton switchButton, boolean isChecked) {
                 Toast.makeText(MainActivity.this, "选中状态" + isChecked, Toast.LENGTH_SHORT).show();
             }
         });
@@ -25,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         SwitchButton switchButton2 = findViewById(R.id.switch_button2);
         switchButton2.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(boolean isChecked) {
+            public void onCheckedChanged(SwitchButton switchButton, boolean isChecked) {
                 Toast.makeText(MainActivity.this, "选中状态" + isChecked, Toast.LENGTH_SHORT).show();
             }
         });
@@ -33,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         SwitchButton switchButton3 = findViewById(R.id.switch_button3);
         switchButton3.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(boolean isChecked) {
+            public void onCheckedChanged(SwitchButton switchButton, boolean isChecked) {
                 Toast.makeText(MainActivity.this, "选中状态" + isChecked, Toast.LENGTH_SHORT).show();
             }
         });
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         SwitchButton switchButton4 = findViewById(R.id.switch_button4);
         switchButton4.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(boolean isChecked) {
+            public void onCheckedChanged(SwitchButton switchButton, boolean isChecked) {
                 Toast.makeText(MainActivity.this, "选中状态" + isChecked, Toast.LENGTH_SHORT).show();
             }
         });
@@ -49,7 +50,16 @@ public class MainActivity extends AppCompatActivity {
         SwitchButton switchButton5 = findViewById(R.id.switch_button5);
         switchButton5.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(boolean isChecked) {
+            public void onCheckedChanged(SwitchButton switchButton, boolean isChecked) {
+                Toast.makeText(MainActivity.this, "选中状态" + isChecked, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        SwitchButton switchButton6 = findViewById(R.id.switch_button6);
+        switchButton6.setEnabled(false);
+        switchButton6.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(SwitchButton switchButton, boolean isChecked) {
                 Toast.makeText(MainActivity.this, "选中状态" + isChecked, Toast.LENGTH_SHORT).show();
             }
         });

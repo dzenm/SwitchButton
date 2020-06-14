@@ -11,13 +11,22 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
 import android.view.View;
+import android.view.ViewStructure;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.LinearInterpolator;
+import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillValue;
 import android.widget.Checkable;
+import android.widget.CompoundButton;
 
 import androidx.annotation.Nullable;
 
@@ -82,7 +91,7 @@ public class SwitchButton extends View implements Checkable {
     /**
      * 按钮阴影的颜色
      */
-    private int mShadowColor = 0X33000000;
+    private int mShadowColor = 0X22000000;
     /**
      * 按钮阴影的偏移量
      */
@@ -115,7 +124,7 @@ public class SwitchButton extends View implements Checkable {
     /**
      * 是否默认是选中状态
      */
-    private boolean isInitChecked = false;
+    private boolean isCheckFromResource = false;
 
     /**
      * 颜色透明度随着滑动的位置改变的估值
@@ -165,15 +174,14 @@ public class SwitchButton extends View implements Checkable {
         if (isShadow) {
             mButtonPaint.setShadowLayer(mShadowRadius, dp2px(1f), mShadowOffset, mShadowColor);
         }
-        if (isChecked) {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    isInitChecked = true;
-                    toggleWithAnimator(!isChecked, NULL_DURATION);
-                }
-            });
-        }
+        post(new Runnable() {
+            @Override
+            public void run() {
+                isCheckFromResource = true;
+                invalidate();
+                toggleWithAnimator(!isChecked, NULL_DURATION);
+            }
+        });
     }
 
     public void setCheckedColor(int checkedColor) {
@@ -317,7 +325,7 @@ public class SwitchButton extends View implements Checkable {
                 float offset = Math.abs(x - downX);
                 if (offset > 5) {
 //                    isScroller = true;
-//                    float fraction = x / getWidth();
+                    float fraction = x / getWidth();
                 }
 
                 break;
@@ -334,18 +342,35 @@ public class SwitchButton extends View implements Checkable {
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-        if (enabled) {
-            if (isChecked) {
-                setChecked(false);
-            }
+    public boolean performClick() {
+        toggle();
+
+        final boolean handled = super.performClick();
+        if (!handled) {
+            // View only makes a sound effect if the onClickListener was
+            // called, so we'll need to make one here instead.
+            playSoundEffect(SoundEffectConstants.CLICK);
         }
+        return handled;
     }
 
     @Override
     public void setChecked(boolean checked) {
-        isChecked = checked;
-        invalidate();
+        if (isChecked != checked) {
+            isChecked = checked;
+
+
+            if (mOnCheckedChangeListener != null) {
+                mOnCheckedChangeListener.onCheckedChanged(this, isChecked);
+            }
+
+            final AutofillManager afm = getContext().getSystemService(AutofillManager.class);
+            if (afm != null) {
+                afm.notifyValueChanged(this);
+            }
+
+            invalidate();
+        }
     }
 
     @Override
@@ -355,8 +380,7 @@ public class SwitchButton extends View implements Checkable {
 
     @Override
     public void toggle() {
-        isChecked = !isChecked;
-        invalidate();
+        setChecked(!isChecked);
     }
 
     /**
@@ -397,10 +421,10 @@ public class SwitchButton extends View implements Checkable {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (isInitChecked) {
-                    isInitChecked = false;
+                if (isCheckFromResource) {
+                    isCheckFromResource = false;
                 } else {
-                    checkedCallback();
+                    toggle();
                 }
                 isRunningAnimator = false;
             }
@@ -417,20 +441,11 @@ public class SwitchButton extends View implements Checkable {
      * @param verticalOffset   纵向的偏移量变化
      */
     private void toggleStateWithInvalidate(float alpha, int horizontalOffset, int verticalOffset) {
+        Log.d(TAG, "alpha: " + alpha);
         mAlpha = alpha;
         mButtonOffset = horizontalOffset;
         mToggleScaleOffset = verticalOffset;
         invalidate();
-    }
-
-    /**
-     * 选中回调
-     */
-    private void checkedCallback() {
-        isChecked = !isChecked;
-        if (mOnCheckedChangeListener != null) {
-            mOnCheckedChangeListener.onCheckedChanged(isChecked);
-        }
     }
 
     /**
@@ -457,6 +472,113 @@ public class SwitchButton extends View implements Checkable {
         return mTouchState == STATE_CLICK;
     }
 
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return SwitchButton.class.getName();
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setChecked(isChecked);
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setCheckable(true);
+        info.setChecked(isChecked);
+    }
+
+    private static class SavedState extends BaseSavedState {
+
+        private boolean checked;
+
+        /**
+         * Constructor called from {@link CompoundButton#onSaveInstanceState()}
+         */
+        private SavedState(Parcelable source) {
+            super(source);
+        }
+
+        /**
+         * Constructor called from {@link #CREATOR}
+         */
+        private SavedState(Parcel in) {
+            super(in);
+            checked = (Boolean) in.readValue(null);
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeValue(checked);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
+
+            @Override
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
+    @Nullable
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+
+        SavedState ss = new SavedState(superState);
+
+        ss.checked = isChecked();
+        return ss;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+
+        super.onRestoreInstanceState(ss.getSuperState());
+        setChecked(ss.checked);
+        requestLayout();
+    }
+
+    @Override
+    public void onProvideStructure(ViewStructure structure) {
+        super.onProvideStructure(structure);
+        structure.setDataIsSensitive(!isCheckFromResource);
+    }
+
+
+    @Override
+    public void autofill(AutofillValue value) {
+        if (!isEnabled()) {
+            return;
+        }
+
+        if (!value.isToggle()) {
+            Log.w(TAG, value + " could not be autofilled into " + this);
+            return;
+        }
+        setChecked(value.getToggleValue());
+    }
+
+    @Override
+    public int getAutofillType() {
+        return isEnabled() ? AUTOFILL_TYPE_TOGGLE : AUTOFILL_TYPE_NONE;
+    }
+
+    @Override
+    public AutofillValue getAutofillValue() {
+        return isEnabled() ? AutofillValue.forToggle(isChecked()) : null;
+    }
+
     private static int dp2px(float value) {
         Resources r = Resources.getSystem();
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, r.getDisplayMetrics());
@@ -466,7 +588,7 @@ public class SwitchButton extends View implements Checkable {
         /**
          * @param isChecked 是否选中
          */
-        void onCheckedChanged(boolean isChecked);
+        void onCheckedChanged(SwitchButton switchButton, boolean isChecked);
     }
 
 }
