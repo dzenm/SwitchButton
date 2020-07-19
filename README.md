@@ -9,7 +9,7 @@ implementation 'com.github.dzenm:switch-button:1.0.0'
 ```
 
 ## 使用
-在Okhttp的拦截器中添加
+在xml文件中添加
 ```xml
 <com.dzenm.lib.SwitchButton
         android:id="@+id/switch_button2"
