@@ -1,6 +1,6 @@
 # 这是一个仿IOS SwitchButton 切换按钮
 
-<img src="picture/screenshot.gif" alt="图片替换文本" width="30%" align="left"/>
+<img src="picture/screenshot.gif" alt="图片替换文本" width="30%"/>
 
 ## 下载 （[查看最新版本](https://github.com/dzenm/switch-button/releases/latest)）
 
