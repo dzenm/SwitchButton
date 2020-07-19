@@ -1,4 +1,4 @@
-# 这是一个仿IOS SwitchButton 切换按钮
+# 这是一个仿IOS SwitchButton 切换按钮 [![](https://jitpack.io/v/dzenm/switch-button.svg)](https://jitpack.io/#dzenm/switch-button)
 
 <img src="picture/screenshot.gif" alt="图片替换文本" width="30%"/>
 
